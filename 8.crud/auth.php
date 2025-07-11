@@ -1,17 +1,42 @@
 <?php
+session_name('auth');
 session_start([
-  'cookie_lifetime'=>300
+  'cookie_lifetime'=>100
 ]);
 $error = false;
 
-if (isset($_POST['username']) && isset($_POST['password'])) {
-  if ($_POST['username']=='admin' && $_POST['password']=='admin') {
-    $_SESSION['loggedin']=true;
-  }else{
-    $error=true;
-    $_SESSION['loggedin']=false;
+
+$username = filter_input(INPUT_POST,'username',FILTER_SANITIZE_STRING);
+$password = filter_input(INPUT_POST,'password',FILTER_SANITIZE_STRING);
+
+// $fp = fopen('./data/users.txt','r');
+// while ($data = fgetcsv($fp)) {
+//   echo $data[1]== sha1($password) ? 'true' : 'false';
+//   echo $data[0]== 'admin' ? 'true' : 'false';
+//   echo $_SESSION['loggedin'] ? 'true' : 'false';
+// }
+if ($username && $password ) {
+  $_SESSION['loggedin']=false;
+  $_SESSION['user']= false;
+  $_SESSION['role']= false;
+  $fp = fopen('./data/users.txt','r');
+  while ($data= fgetcsv($fp)) {
+    if ($data[0]== $username && $data[1] == sha1($password)) {
+      $_SESSION['loggedin']=true;
+      $_SESSION['user']= $username;
+      $_SESSION['role']= $data[2];
+      header('location:index.php');
+    }
   }
+  if (!$_SESSION['loggedin']) {
+    $error = true;
+    
+  }
+  // fclose($fp);
+
 }
+
+
 
 // if ($_GET['logout']) {
 //   $_SESSION['loggedin']=false;
@@ -19,11 +44,14 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 //   exit;
 // }
 
-if (isset($_POST['logout'])) {
+if (isset($_GET['logout'])) {
   $_SESSION['loggedin']=false;
+  $_SESSION['user']= false;
+  $_SESSION['role']= false;
   session_destroy();
-}
+  header('location:index.php');
 
+}
 ?>
 
 <!DOCTYPE html>
@@ -71,7 +99,7 @@ if (isset($_POST['logout'])) {
       <?php
         else:
       ?>
-      <form action="auth.php" class='grid' method="POST">
+      <form action="auth.php" class='grid' method="GET">
         <input type="hidden" name="logout" value='1'>
       <button type='submit' class='bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition duration-300 ease-in-out w-full mt-4 text-center font-bold cursor-pointer'>Log Out</button>
       </form>

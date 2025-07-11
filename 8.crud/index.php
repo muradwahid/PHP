@@ -3,8 +3,16 @@
   $info='';
   $task = $_GET['task'] ?? 'report';
   $error = $_GET['error']?? '0';
-
+  $fp = fopen('./data/users.txt','r');
+  if ('edit' == $task && !hasPrivilege()) {
+    header("location: /8.crud/index.php?task=report");
+  }
   if ('delete'==$task) {
+    if(!isAdmin()){
+      header("location: /8.crud/index.php?task=report");
+      // die();
+      return;
+    }
     $id = filter_input(INPUT_GET,'id',FILTER_SANITIZE_STRING);
     if ($id>0) {
       deleteStudent($id);
@@ -13,6 +21,10 @@
   }
 
   if ('seed'== $task) {
+    if(!isAdmin()){
+      header("location: /8.crud/index.php?task=report");
+      return;
+    }
     seed();
     $info = 'Database seeded successfully.';
   }
@@ -64,7 +76,7 @@
   <title>Document</title>
 </head>
 <body>
-  <div class="container">
+  <div class="container mx-auto">
     <div class="w-1/2 mx-auto mt-10">
       <h2 class='text-center'>Project 2 - CRUD</h2>
       <p class='text-center'>A sample project to perform CRUD operations using plain files and PHP.</p>
@@ -85,7 +97,7 @@
       <?php endif;?>
       
       <?php if('report'==$task): ?>
-      <div class="w-1/2 mx-auto mt-10">
+      <div class="mx-auto mt-10">
         <?php
           generateReport();
         ?>

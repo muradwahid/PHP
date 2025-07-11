@@ -42,12 +42,14 @@ function generateReport (){
   $serializedData = file_get_contents(DB_NAME);
   $students = unserialize($serializedData);
   ?>
-<table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+<table class="w-full divide-y divide-gray-200 border border-gray-300">
   <thead class="bg-gray-100">
         <tr>
           <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
           <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Roll</th>
+          <?php if(hasPrivilege()):?>
           <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Action</th>
+          <?php endif;?>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
@@ -57,9 +59,15 @@ function generateReport (){
         <tr>
           <td class="px-4 py-2 whitespace-nowrap"><?php printf("%s %s",$student['fname'],$student['lname']) ?></td>
           <td class="px-4 py-2 whitespace-nowrap"><?php printf("%s",$student['roll'])?></td>
+          <?php if(hasPrivilege()):?>
           <td class="px-4 py-2 whitespace-nowrap">
-            <?php echo sprintf('<a href="/8.crud/index.php/?task=edit&id=%s" class="text-blue-600 hover:underline">Edit</a> | <a href="/8.crud/index.php/?task=delete&id=%s" class="text-red-600 hover:underline delete">Delete</a>', $student['id'], $student['id']); ?>
+            <?php if(isAdmin()): ?>
+                <?php echo sprintf('<a href="/8.crud/index.php/?task=edit&id=%s" class="text-blue-600 hover:underline">Edit</a> | <a href="/8.crud/index.php/?task=delete&id=%s" class="text-red-600 hover:underline delete">Delete</a>', $student['id'], $student['id']); ?>
+            <?php elseif(isEditor()):?>
+            <?php echo sprintf('<a href="/8.crud/index.php/?task=edit&id=%s" class="text-blue-600 hover:underline">Edit</a>', $student['id']); ?>
+            <?php endif; ?>
           </td>
+          <?php endif; ?>
         </tr>
         <?php
       }
@@ -150,4 +158,17 @@ function deleteStudent ($id){
 function getNewId($students){
   $maxId = max(array_column($students,'id'));
   return $maxId+1;
+}
+
+
+function isAdmin (){
+  return ('admin' == $_SESSION['role']);
+}
+
+function isEditor (){
+  return ('editor' == $_SESSION['role']);
+}
+
+function hasPrivilege(){
+  return (isAdmin() || isEditor());
 }
