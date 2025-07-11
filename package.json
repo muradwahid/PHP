@@ -1,0 +1,18 @@
+{
+  "name": "php-project",
+  "version": "1.0.0",
+  "description": "A basic PHP project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0",
+    "dev": "php -S localhost:8000 -t .",
+    "serve": "browser-sync start --config config.js",
+    "start": "concurrently \"php -S localhost:8000\" \"browser-sync start --proxy localhost:8000 --files '**/*.php'\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
